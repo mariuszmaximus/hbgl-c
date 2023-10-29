@@ -1,0 +1,5 @@
+# hbgl-c
+*.bak
+*.exe
+lib
+tmp
