@@ -26,7 +26,23 @@ typedef enum bool
    T = ( ! 0 )
 } bool;
 
-typedef struct _HBGL
+typedef struct _HBGL HBGL;
+typedef struct _Image Image;
+
+struct _Image
+{
+   HBGL *pHBGL;
+   unsigned int textureID;
+   int imageID;
+   int x;
+   int y;
+   int width;
+   int height;
+   int channels;
+
+};
+
+struct _HBGL
 {
    GLFWwindow   *window;       // handle of the created window
    int           width;        // desired width, in screen coordinates, of the window
@@ -47,7 +63,9 @@ typedef struct _HBGL
 
    unsigned long background;
 
-} HBGL;
+   Image **images;             // Pointer to an array of Image structures
+   int imageCount;             // Number of images loaded
+};
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 // API functions
@@ -56,6 +74,10 @@ bool MainLoop( HBGL *w );
 bool CloseAll( HBGL *w );
 void Background( HBGL *w, unsigned long color );
 void WaitEvents();
+
+Image *ImageNew( HBGL *pHBGL, const char *image_path );
+void DrawImage( Image *image, float x, float y, float width, float height );
+void FreeImage( Image *image );
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 void begin_drawing( HBGL *w );

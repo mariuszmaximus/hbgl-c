@@ -110,6 +110,10 @@ HBGL *WindowNew( int width, int height, const char *title )
    pHBGL->height = height;
    pHBGL->title  = title;
 
+   // Image
+   pHBGL->images = NULL;
+   pHBGL->imageCount = 0;
+
    pHBGL->window = glfwCreateWindow( pHBGL->width, pHBGL->height, pHBGL->title, NULL, NULL );
    if( ! pHBGL->window )
    {
@@ -185,6 +189,15 @@ bool CloseAll( HBGL *pHBGL )
 {
    if( pHBGL )
    {
+      if( pHBGL->images != NULL )
+      {
+         for( int i = 0; i < pHBGL->imageCount; ++i )
+         {
+            FreeImage( pHBGL->images[ i ] );
+         }
+         free( pHBGL->images );
+      }
+
       glfwDestroyWindow( pHBGL->window );
       free( pHBGL );
       glfwTerminate();
