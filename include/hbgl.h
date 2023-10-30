@@ -76,8 +76,8 @@ void Background( HBGL *w, unsigned long color );
 void WaitEvents();
 
 Image *ImageNew( HBGL *pHBGL, const char *image_path );
-void DrawImage( Image *image, float x, float y, float width, float height );
-void FreeImage( Image *image );
+void DrawImage( Image *pImage, int x, int y, int width, int height );
+void FreeImage( Image *pImage );
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 void begin_drawing( HBGL *w );

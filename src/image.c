@@ -10,39 +10,39 @@ Image *ImageNew( HBGL *pHBGL, const char *image_path )
 {
    static int imageCounter = 0;  // Statyczna zmienna do zliczania obrazów
 
-   Image *image = ( Image * ) malloc( sizeof( Image ) );
-   if( ! image )
+   Image *pImage = ( Image * ) malloc( sizeof( Image ) );
+   if( ! pImage )
    {
       fprintf( stderr, "Failed to allocate memory for new image.\n" );
       return NULL;
    }
 
-   image->pHBGL = pHBGL;  // Ustawiamy wskaźnik do HBGL
+   pImage->pHBGL = pHBGL;  // Ustawiamy wskaźnik do HBGL
 
    // Dodanie obrazu do listy obrazów w HBGL
-   image->pHBGL->imageCount++;
-   image->pHBGL->images = realloc( image->pHBGL->images, image->pHBGL->imageCount * sizeof( Image * ) );
-   if( image->pHBGL->images == NULL )
+   pImage->pHBGL->imageCount++;
+   pImage->pHBGL->images = realloc( pImage->pHBGL->images, pImage->pHBGL->imageCount * sizeof( Image * ) );
+   if( ! pImage->pHBGL->images )
    {
       fprintf( stderr, "Failed to reallocate memory for image array.\n" );
-      free( image );
+      free( pImage );
       return NULL;
    }
-   image->pHBGL->images[ image->pHBGL->imageCount - 1 ] = image;
+   pImage->pHBGL->images[ pImage->pHBGL->imageCount - 1 ] = pImage;
 
-   image->imageID = ++imageCounter;  // przydzielanie unikatowego ID
+   pImage->imageID = ++imageCounter;  // przydzielanie unikatowego ID
 
    unsigned char *data;
-   data = stbi_load( image_path, &image->width, &image->height, &image->channels, 0 );
+   data = stbi_load( image_path, &pImage->width, &pImage->height, &pImage->channels, 0 );
    if( ! data )
    {
       fprintf( stderr, "Failed to load image: %s\n", image_path );
-      free( image );
+      free( pImage );
       return NULL;
    }
 
-   glGenTextures( 1, &image->textureID );
-   glBindTexture( GL_TEXTURE_2D, image->textureID );
+   glGenTextures( 1, &pImage->textureID );
+   glBindTexture( GL_TEXTURE_2D, pImage->textureID );
 
    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );  // Recommended by NVIDIA
 
@@ -51,21 +51,21 @@ Image *ImageNew( HBGL *pHBGL, const char *image_path )
    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-   if( image->channels == 3 )
+   if( pImage->channels == 3 )
    {
-      glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, image->width, image->height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+      glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, pImage->width, pImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
    }
-   else if( image->channels == 4 )
+   else if( pImage->channels == 4 )
    {
-      glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
+      glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, pImage->width, pImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
    }
 
    stbi_image_free( data );
 
-   return image;
+   return pImage;
 }
 
-void DrawImage( Image *image, float x, float y, float width, float height )
+void DrawImage( Image *pImage, int x, int y, int width, int height )
 {
    bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
    if( ! wasEnabled )
@@ -73,14 +73,14 @@ void DrawImage( Image *image, float x, float y, float width, float height )
       glEnable( GL_TEXTURE_2D );
    }
 
-   glBindTexture( GL_TEXTURE_2D, image->textureID );
+   glBindTexture( GL_TEXTURE_2D, pImage->textureID );
 
    glBegin( GL_QUADS );
-      glTexCoord2f( 0.0f, 1.0f ); glVertex2f( x, y + height );
-      glTexCoord2f( 1.0f, 1.0f ); glVertex2f( x + width, y + height );
-      glTexCoord2f( 1.0f, 0.0f ); glVertex2f( x + width, y );
-      glTexCoord2f( 0.0f, 0.0f ); glVertex2f( x, y );
-    glEnd();
+      glTexCoord2f( 0.0f, 1.0f ); glVertex2f( ( float )   x, ( float ) ( y + height ) );
+      glTexCoord2f( 1.0f, 1.0f ); glVertex2f( ( float ) ( x + width ), ( float ) ( y + height ) );
+      glTexCoord2f( 1.0f, 0.0f ); glVertex2f( ( float ) ( x + width ), ( float ) y );
+      glTexCoord2f( 0.0f, 0.0f ); glVertex2f( ( float )   x, ( float ) y );
+   glEnd();
 
    glBindTexture( GL_TEXTURE_2D, 0 );
 
@@ -90,11 +90,11 @@ void DrawImage( Image *image, float x, float y, float width, float height )
    }
 }
 
-void FreeImage( Image *image )
+void FreeImage( Image *pImage )
 {
-   if( image != NULL )
+   if( pImage != NULL )
    {
-      glDeleteTextures( 1, &image->textureID );
-      free( image );
+      glDeleteTextures( 1, &pImage->textureID );
+      free( pImage );
    }
 }

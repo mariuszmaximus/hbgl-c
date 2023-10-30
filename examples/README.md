@@ -1,5 +1,9 @@
 # hbgl-c
 
+## List of GLFW releases
+
+   [Releases](https://github.com/glfw/glfw/releases)
+
 ## Installing on Windows
 
 - MSYS2
