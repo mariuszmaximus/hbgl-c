@@ -110,6 +110,10 @@ HBGL *WindowNew( int width, int height, const char *title )
    pHBGL->height = height;
    pHBGL->title  = title;
 
+   // Font
+   pHBGL->fonts = NULL;
+   pHBGL->fontCount = 0;
+
    // Image
    pHBGL->images = NULL;
    pHBGL->imageCount = 0;
@@ -189,11 +193,22 @@ bool CloseAll( HBGL *pHBGL )
 {
    if( pHBGL )
    {
+      if( pHBGL->fonts != NULL )
+      {
+         for( int i = 0; i < pHBGL->fontCount; ++i )
+         {
+            FreeFont( pHBGL->fonts[ i ] );
+            printf( "Font number %d has been closed successfully.\n", i + 1 );
+         }
+         free( pHBGL->fonts );
+      }
+      //---
       if( pHBGL->images != NULL )
       {
          for( int i = 0; i < pHBGL->imageCount; ++i )
          {
             FreeImage( pHBGL->images[ i ] );
+            printf( "Image number %d has been closed successfully.\n", i + 1 );
          }
          free( pHBGL->images );
       }

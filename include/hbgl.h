@@ -27,7 +27,18 @@ typedef enum bool
 } bool;
 
 typedef struct _HBGL HBGL;
+typedef struct _Font Font;
 typedef struct _Image Image;
+
+struct _Font
+{
+   HBGL *pHBGL;
+   unsigned int textureID;
+   int fontID;
+   int x;
+   int y;
+   stbtt_bakedchar cdata[ 380 ];
+};
 
 struct _Image
 {
@@ -39,7 +50,6 @@ struct _Image
    int width;
    int height;
    int channels;
-
 };
 
 struct _HBGL
@@ -63,6 +73,9 @@ struct _HBGL
 
    unsigned long background;
 
+   Font **fonts;               // Pointer to an array of Font structures
+   int fontCount;              // Number of fonts loaded
+
    Image **images;             // Pointer to an array of Image structures
    int imageCount;             // Number of images loaded
 };
@@ -70,18 +83,23 @@ struct _HBGL
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 // API functions
 HBGL *WindowNew( int width, int height, const char *title );
-bool MainLoop( HBGL *w );
-bool CloseAll( HBGL *w );
-void Background( HBGL *w, unsigned long color );
+bool MainLoop( HBGL *pHBGL );
+bool CloseAll( HBGL *pHBGL );
+void Background( HBGL *pHBGL, unsigned long color );
 void WaitEvents();
 
 Image *ImageNew( HBGL *pHBGL, const char *image_path );
 void DrawImage( Image *pImage, int x, int y, int width, int height );
 void FreeImage( Image *pImage );
 
+Font *SystemFontNew( HBGL *pHBGL, const char *font_name );
+Font *FontNew( HBGL *pHBGL, const char *font_path );
+void DrawFont( Font *pFont, float x, float y, const char *text, float fontSize, unsigned int color );
+void FreeFont( Font *pFont );
+
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-void begin_drawing( HBGL *w );
-void end_drawing( HBGL *w );
+void begin_drawing( HBGL *pHBGL );
+void end_drawing( HBGL *pHBGL );
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 void CheckOpenGLError( const char* stmt, const char* fname, int line );
@@ -103,7 +121,7 @@ void CheckHBGLError( HBGLErrorCode error_code, const char* description, const ch
 #define MIN( a, b ) ( ( a ) < ( b ) ? ( a ) : ( b ) )
 #define UNUSED( n ) ( ( void )( n ) )
 
-#define BeginDrawing( w ) do { begin_drawing( w )
-#define EndDrawing( w ) end_drawing( w ); } while( 0 )
+#define BeginDrawing( pHBGL ) do { begin_drawing( pHBGL )
+#define EndDrawing( pHBGL ) end_drawing( pHBGL ); } while( 0 )
 
 #endif /* End HBGL_H_ */
