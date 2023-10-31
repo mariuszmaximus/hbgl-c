@@ -73,6 +73,43 @@ static void set_clear_color_fromHex( unsigned long hexColor )
    }
 }
 
+static void printDiagnostics( HBGL *pHBGL )
+{
+   // Ustaw kursor na początek linii i wyczyść linię
+   printf( "\r\033[K" );
+
+   printf( "Window Dimensions: %dx%d, Total Fonts: %d, Total Images: %d",
+           pHBGL->width, pHBGL->height, pHBGL->fontCount, pHBGL->imageCount );
+
+   printf( ", Cursor Position: (%.2f, %.2f)", pHBGL->cursorX, pHBGL->cursorY );
+
+   printf(", Last Key: %d, Last Mouse Button: %d", pHBGL->keyCode, pHBGL->mouseButton );
+
+   if( pHBGL->winMaximized )
+   {
+      printf(", Window is maximized");
+   }
+   else
+   {
+      printf(", Window is normal");
+   }
+
+   // Informacje o pierwszym foncie (jeśli istnieje)
+   if( pHBGL->fontCount > 0 && pHBGL->fonts[ 0 ] )
+   {
+      printf( ", First Font ID: %d, Texture ID: %u", pHBGL->fonts[ 0 ]->fontID, pHBGL->fonts[ 0 ]->textureID );
+   }
+
+   // Informacje o pierwszym obrazie (jeśli istnieje)
+   if( pHBGL->imageCount > 0 && pHBGL->images[ 0 ] )
+   {
+      printf( ", First Image ID: %d, Dimensions: %dx%d", pHBGL->images[ 0 ]->imageID, pHBGL->images[ 0 ]->width, pHBGL->images[ 0 ]->height );
+   }
+
+   // Spłucz bufor, aby upewnić się, że dane są wyświetlone
+   fflush( stdout );
+}
+
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 // internal
 void CheckHBGLError( HBGLErrorCode error_code, const char* description, const char* file, int line )
@@ -185,6 +222,7 @@ void begin_drawing( HBGL *pHBGL )
 
 void end_drawing( HBGL *pHBGL )
 {
+   printDiagnostics( pHBGL );
    CHECK_OPENGL_ERROR( "end_drawing" );
    glfwSwapBuffers( pHBGL->window );
 }
