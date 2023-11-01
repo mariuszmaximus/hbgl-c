@@ -9,7 +9,7 @@ int main()
    HBGL *app = WindowNew( 830, 450, "Test Image 8x8" );
    Image *img = ImageNew( app, "../docs/assets/img/8x8.png" );
 
-   Background( app, 0x000000 );
+   Background( app, 0x323232 );
 
    while( ! MainLoop( app ) )
    {

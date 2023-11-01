@@ -102,6 +102,8 @@ Font *FontNew( HBGL *pHBGL, const char *font_path )
       return NULL;
    }
 
+   memset( pFont, 0, sizeof( Font ) );
+
    pFont->pHBGL = pHBGL;  // Ustawiamy wskaźnik do HBGL
 
    // Dodanie czcionki do listy obrazów w HBGL

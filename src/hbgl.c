@@ -82,10 +82,9 @@ static void printDiagnostics( HBGL *pHBGL )
    printf( "\033[H" );
 
    printf( "Window Dimensions: %dx%d\n", pHBGL->width, pHBGL->height );
-   printf( "Total Fonts: %d\n", pHBGL->fontCount );
-   printf( "Total Images: %d\n", pHBGL->imageCount );
    printf( "Cursor Position: (%.2f, %.2f)\n", pHBGL->cursorX, pHBGL->cursorY );
-   printf( "Last Key: %d, Last Mouse Button: %d\n", pHBGL->keyCode, pHBGL->mouseButton );
+   printf( "Last Key: %d, Scancode: %d, Action: %d, Mods: %d\n", pHBGL->keyCode, pHBGL->keyScancode, pHBGL->keyAction, pHBGL->keyMods );
+   printf( "Last Mouse Button: %d, Action: %d, Mods: %d\n", pHBGL->mouseButton, pHBGL->mouseAction, pHBGL->mouseMods );
 
    if( pHBGL->winMaximized )
    {
@@ -96,14 +95,37 @@ static void printDiagnostics( HBGL *pHBGL )
       printf( "Window is: normal\n" );
    }
 
+   printf( "Background Color: %#lx\n", pHBGL->background );
+
    if( pHBGL->fontCount > 0 && pHBGL->fonts[ 0 ] )
    {
-      printf( "First Font ID: %d, Texture ID: %u\n", pHBGL->fonts[ 0 ]->fontID, pHBGL->fonts[ 0 ]->textureID );
+      printf( "\n" );
+      printf( "Total Fonts: %d\n", pHBGL->fontCount );
+      for( int i = 0; i < pHBGL->fontCount; i++ )
+      {
+         struct _Font *font = pHBGL->fonts[ i ];
+         printf( "Font ID: %d\n", font->fontID );
+         printf( "Texture ID: %u\n", font->textureID );
+         printf( "x: %d\n", font->x );
+         printf( "y: %d\n", font->y );
+      }
    }
 
    if( pHBGL->imageCount > 0 && pHBGL->images[ 0 ] )
    {
-      printf( "First Image ID: %d, Dimensions: %dx%d\n", pHBGL->images[ 0 ]->imageID, pHBGL->images[ 0 ]->width, pHBGL->images[ 0 ]->height );
+      printf( "\n" );
+      printf( "Total Images: %d\n", pHBGL->imageCount );
+      for( int i = 0; i < pHBGL->imageCount; i++ )
+      {
+         struct _Image *image = pHBGL->images[ i ];
+         printf( "Image ID: %d\n", image->imageID );
+         printf( "Texture ID: %u\n", image->textureID );
+         printf( "x: %d\n", image->x );
+         printf( "y: %d\n", image->y );
+         printf( "Width: %d\n", image->width );
+         printf( "Height: %d\n", image->height );
+         printf( "Channels: %d\n", image->channels );
+      }
    }
 
    fflush( stdout );
@@ -141,6 +163,8 @@ HBGL *WindowNew( int width, int height, const char *title )
       fprintf( stderr, "Memory allocation failed for HBGL structure.\n" );
       return NULL;
    }
+
+   memset( pHBGL, 0, sizeof( HBGL ) );
 
    pHBGL->width  = width;
    pHBGL->height = height;

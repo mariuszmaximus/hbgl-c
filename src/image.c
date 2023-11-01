@@ -17,6 +17,8 @@ Image *ImageNew( HBGL *pHBGL, const char *image_path )
       return NULL;
    }
 
+   memset( pImage, 0, sizeof( Image ) );
+
    pImage->pHBGL = pHBGL;  // Ustawiamy wskaźnik do HBGL
 
    // Dodanie obrazu do listy obrazów w HBGL
