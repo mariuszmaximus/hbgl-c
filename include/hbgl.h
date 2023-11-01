@@ -86,6 +86,7 @@ HBGL *WindowNew( int width, int height, const char *title );
 bool MainLoop( HBGL *pHBGL );
 bool CloseAll( HBGL *pHBGL );
 void Background( HBGL *pHBGL, unsigned long color );
+void PollEvents();
 void WaitEvents();
 
 Image *ImageNew( HBGL *pHBGL, const char *image_path );
@@ -96,6 +97,14 @@ Font *SystemFontNew( HBGL *pHBGL, const char *font_name );
 Font *FontNew( HBGL *pHBGL, const char *font_path );
 void DrawFont( Font *pFont, float x, float y, const char *text, float fontSize, unsigned int color );
 void FreeFont( Font *pFont );
+
+void Point( int x, int y, unsigned int color );
+void PointSize( int x, int y, int point_size, unsigned int color );
+void Line( int x1, int y1, int x2, int y2, unsigned int color );
+void LineWidth( int x1, int y1, int x2, int y2, int line_width, unsigned int color );
+void Rect( int x1, int y1, int x2, int y2, unsigned int color );
+void RectWidth( int x1, int y1, int x2, int y2, int line_width, unsigned int color );
+void FillRect( int x1, int y1, int x2, int y2, unsigned int color );
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 void begin_drawing( HBGL *pHBGL );

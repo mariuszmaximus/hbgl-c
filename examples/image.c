@@ -6,7 +6,7 @@
 
 int main()
 {
-   HBGL *app = WindowNew( 830, 450, "Test window" );
+   HBGL *app = WindowNew( 830, 450, "Test image" );
    Image *img = ImageNew( app, "../docs/assets/img/harbour_logo.png" );
 
    Background( app, 0xF1F1F1 );

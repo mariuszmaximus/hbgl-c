@@ -75,38 +75,37 @@ static void set_clear_color_fromHex( unsigned long hexColor )
 
 static void printDiagnostics( HBGL *pHBGL )
 {
-   // Ustaw kursor na początek linii i wyczyść linię
-   printf( "\r\033[K" );
+   // Wyczyść ekran
+   printf( "\033[2J" );
 
-   printf( "Window Dimensions: %dx%d, Total Fonts: %d, Total Images: %d",
-           pHBGL->width, pHBGL->height, pHBGL->fontCount, pHBGL->imageCount );
+   // Ustaw kursor na początek ekranu
+   printf( "\033[H" );
 
-   printf( ", Cursor Position: (%.2f, %.2f)", pHBGL->cursorX, pHBGL->cursorY );
-
-   printf(", Last Key: %d, Last Mouse Button: %d", pHBGL->keyCode, pHBGL->mouseButton );
+   printf( "Window Dimensions: %dx%d\n", pHBGL->width, pHBGL->height );
+   printf( "Total Fonts: %d\n", pHBGL->fontCount );
+   printf( "Total Images: %d\n", pHBGL->imageCount );
+   printf( "Cursor Position: (%.2f, %.2f)\n", pHBGL->cursorX, pHBGL->cursorY );
+   printf( "Last Key: %d, Last Mouse Button: %d\n", pHBGL->keyCode, pHBGL->mouseButton );
 
    if( pHBGL->winMaximized )
    {
-      printf(", Window is maximized");
+      printf( "Window is: maximized\n" );
    }
    else
    {
-      printf(", Window is normal");
+      printf( "Window is: normal\n" );
    }
 
-   // Informacje o pierwszym foncie (jeśli istnieje)
    if( pHBGL->fontCount > 0 && pHBGL->fonts[ 0 ] )
    {
-      printf( ", First Font ID: %d, Texture ID: %u", pHBGL->fonts[ 0 ]->fontID, pHBGL->fonts[ 0 ]->textureID );
+      printf( "First Font ID: %d, Texture ID: %u\n", pHBGL->fonts[ 0 ]->fontID, pHBGL->fonts[ 0 ]->textureID );
    }
 
-   // Informacje o pierwszym obrazie (jeśli istnieje)
    if( pHBGL->imageCount > 0 && pHBGL->images[ 0 ] )
    {
-      printf( ", First Image ID: %d, Dimensions: %dx%d", pHBGL->images[ 0 ]->imageID, pHBGL->images[ 0 ]->width, pHBGL->images[ 0 ]->height );
+      printf( "First Image ID: %d, Dimensions: %dx%d\n", pHBGL->images[ 0 ]->imageID, pHBGL->images[ 0 ]->width, pHBGL->images[ 0 ]->height );
    }
 
-   // Spłucz bufor, aby upewnić się, że dane są wyświetlone
    fflush( stdout );
 }
 
@@ -266,6 +265,11 @@ bool CloseAll( HBGL *pHBGL )
 void Background( HBGL *pHBGL, unsigned long color )
 {
    pHBGL->background = color;
+}
+
+void PollEvents()
+{
+   glfwPollEvents();
 }
 
 void WaitEvents()
