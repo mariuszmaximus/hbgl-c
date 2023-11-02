@@ -103,7 +103,7 @@ static void printDiagnostics( HBGL *pHBGL )
       printf( "Total Fonts: %d\n", pHBGL->fontCount );
       for( int i = 0; i < pHBGL->fontCount; i++ )
       {
-         struct _Font *font = pHBGL->fonts[ i ];
+         Font *font = pHBGL->fonts[ i ];
          printf( "Font ID: %d\n", font->fontID );
          printf( "Texture ID: %u\n", font->textureID );
          printf( "x: %d\n", font->x );
@@ -117,7 +117,7 @@ static void printDiagnostics( HBGL *pHBGL )
       printf( "Total Images: %d\n", pHBGL->imageCount );
       for( int i = 0; i < pHBGL->imageCount; i++ )
       {
-         struct _Image *image = pHBGL->images[ i ];
+         Image *image = pHBGL->images[ i ];
          printf( "Image ID: %d\n", image->imageID );
          printf( "Texture ID: %u\n", image->textureID );
          printf( "x: %d\n", image->x );
