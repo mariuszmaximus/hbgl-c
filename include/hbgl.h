@@ -115,12 +115,16 @@ void begin_drawing( HBGL *pHBGL );
 void end_drawing( HBGL *pHBGL );
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-void CheckOpenGLError( const char* stmt, const char* fname, int line );
+void CheckOpenGLError( const char *stmt, const char *fname, int line, GLenum *errCode );
 void CheckHBGLError( HBGLErrorCode error_code, const char* description, const char* file, int line );
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 // macros
-#define CHECK_OPENGL_ERROR( stmt ) CheckOpenGLError( stmt, __FILE__, __LINE__ )
+#define CHECK_OPENGL_ERROR( stmt ) \
+   GLenum errCode; \
+   CheckOpenGLError( stmt, __FILE__, __LINE__, &errCode ); \
+   if( errCode != GL_NO_ERROR ) return;
+
 #define CHECK_HBGL_ERROR( error_code, description ) \
    do { \
       HBGLErrorCode code = ( error_code ); \

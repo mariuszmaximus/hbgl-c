@@ -5,10 +5,10 @@ LIBNAME = libhbgl.a
 
 ifeq ($(OS),Windows_NT)
     DESTDIR = lib/win/mingw64
-    CFLAGS = -Wall -Wextra -O3
+    CFLAGS = -Wall -Wextra -O3 -std=c99
 else
     DESTDIR = lib/linux/gcc
-    CFLAGS = -Wall -Wextra -O3
+    CFLAGS = -Wall -Wextra -O3 -std=c99
 endif
 
 INCLUDE_DIR = include

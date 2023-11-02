@@ -138,13 +138,17 @@ void CheckHBGLError( HBGLErrorCode error_code, const char* description, const ch
    printf( "[HBGL ERROR] %s (code %d) at %s:%d\n", description, error_code, file, line );
 }
 
-void CheckOpenGLError( const char* stmt, const char* fname, int line )
+void CheckOpenGLError( const char *stmt, const char *fname, int line, GLenum *errCode )
 {
    GLenum err = glGetError();
    if( err != GL_NO_ERROR )
    {
       printf( "OpenGL error %08x, at %s:%i - for %s\n", err, fname, line, stmt );
-      abort();
+      *errCode = err;
+   }
+   else
+   {
+     *errCode = GL_NO_ERROR;
    }
 }
 
