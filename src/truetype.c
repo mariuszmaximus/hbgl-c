@@ -171,6 +171,10 @@ Font *FontNew( HBGL *pHBGL, const char *font_path )
 
 void DrawFont( Font *pFont, float x, float y, const char *text, float fontSize, unsigned int color )
 {
+   // Aktualizacja pozycji obrazu
+   pFont->x = x;
+   pFont->y = y;
+
    bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
    if( ! wasEnabled )
    {

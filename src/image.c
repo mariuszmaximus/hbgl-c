@@ -69,6 +69,10 @@ Image *ImageNew( HBGL *pHBGL, const char *image_path )
 
 void DrawImage( Image *pImage, int x, int y, int width, int height )
 {
+   // Aktualizacja pozycji obrazu
+   pImage->x = x;
+   pImage->y = y;
+
    bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
    if( ! wasEnabled )
    {
