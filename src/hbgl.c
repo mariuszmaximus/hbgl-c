@@ -97,10 +97,25 @@ static void printDiagnostics( HBGL *pHBGL )
 
    printf( "Background Color: %#lx\n", pHBGL->background );
 
+   printf( "\n" );
+   printf( "Total Fonts: %d\n", pHBGL->fontCount );
+      if( pHBGL->failedFontCount > 0 )
+      {
+         printf( "Failed to load Fonts: %d\n", pHBGL->failedFontCount );
+      }
+
+   printf( "Total Images: %d\n", pHBGL->imageCount );
+      if( pHBGL->failedImageCount > 0 )
+      {
+         printf( "Failed to load Images: %d\n", pHBGL->failedImageCount );
+      }
+
+   printf( "\n" );
+
    if( pHBGL->fontCount > 0 && pHBGL->fonts[ 0 ] )
    {
       printf( "\n" );
-      printf( "Total Fonts: %d\n", pHBGL->fontCount );
+      printf("Font: %d\n", pHBGL->fontCount);
       for( int i = 0; i < pHBGL->fontCount; i++ )
       {
          Font *pFont = pHBGL->fonts[ i ];
@@ -114,7 +129,7 @@ static void printDiagnostics( HBGL *pHBGL )
    if( pHBGL->imageCount > 0 && pHBGL->images[ 0 ] )
    {
       printf( "\n" );
-      printf( "Total Images: %d\n", pHBGL->imageCount );
+      printf("Image: %d\n", pHBGL->imageCount);
       for( int i = 0; i < pHBGL->imageCount; i++ )
       {
          Image *pImage = pHBGL->images[ i ];
@@ -177,10 +192,12 @@ HBGL *WindowNew( int width, int height, const char *title )
    // Font
    pHBGL->fonts = NULL;
    pHBGL->fontCount = 0;
+   pHBGL->failedFontCount = 0;
 
    // Image
    pHBGL->images = NULL;
    pHBGL->imageCount = 0;
+   pHBGL->failedImageCount = 0;
 
    pHBGL->window = glfwCreateWindow( pHBGL->width, pHBGL->height, pHBGL->title, NULL, NULL );
    if( ! pHBGL->window )

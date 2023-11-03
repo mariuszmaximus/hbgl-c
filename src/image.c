@@ -39,8 +39,21 @@ Image *ImageNew( HBGL *pHBGL, const char *image_path )
    if( ! data )
    {
       fprintf( stderr, "Failed to load image: %s\n", image_path );
-      free( pImage );
-      return NULL;
+      // Cleanup if image loading failed
+      pImage->pHBGL->imageCount--;
+      if( pImage->pHBGL->imageCount > 0 )
+      {
+         pImage->pHBGL->images[ pImage->pHBGL->imageCount ] = NULL;
+      }
+      else
+      {
+         free( pImage->pHBGL->images );
+         pImage->pHBGL->images = NULL;
+      }
+
+      // Returning Image with zeroed dimensions to avoid errors with unloaded images.
+      memset( pImage, 0, sizeof( Image ) );
+      return pImage;
    }
 
    glGenTextures( 1, &pImage->textureID );
@@ -69,30 +82,37 @@ Image *ImageNew( HBGL *pHBGL, const char *image_path )
 
 void DrawImage( Image *pImage, int x, int y, int width, int height )
 {
-   // Aktualizacja pozycji obrazu
-   pImage->x = x;
-   pImage->y = y;
-
-   bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
-   if( ! wasEnabled )
+   if( pImage && pImage->pHBGL && pImage->pHBGL->images )
    {
-      glEnable( GL_TEXTURE_2D );
+      // Aktualizacja pozycji obrazu
+      pImage->x = x;
+      pImage->y = y;
+
+      bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
+      if( ! wasEnabled )
+      {
+         glEnable( GL_TEXTURE_2D );
+      }
+
+      glBindTexture( GL_TEXTURE_2D, pImage->textureID );
+
+      glBegin( GL_QUADS );
+         glTexCoord2f( 0.0f, 1.0f ); glVertex2f( ( float )   x, ( float ) ( y + height ) );
+         glTexCoord2f( 1.0f, 1.0f ); glVertex2f( ( float ) ( x + width ), ( float ) ( y + height ) );
+         glTexCoord2f( 1.0f, 0.0f ); glVertex2f( ( float ) ( x + width ), ( float ) y );
+         glTexCoord2f( 0.0f, 0.0f ); glVertex2f( ( float )   x, ( float ) y );
+      glEnd();
+
+      glBindTexture( GL_TEXTURE_2D, 0 );
+
+      if( ! wasEnabled )
+      {
+         glDisable( GL_TEXTURE_2D );
+      }
    }
-
-   glBindTexture( GL_TEXTURE_2D, pImage->textureID );
-
-   glBegin( GL_QUADS );
-      glTexCoord2f( 0.0f, 1.0f ); glVertex2f( ( float )   x, ( float ) ( y + height ) );
-      glTexCoord2f( 1.0f, 1.0f ); glVertex2f( ( float ) ( x + width ), ( float ) ( y + height ) );
-      glTexCoord2f( 1.0f, 0.0f ); glVertex2f( ( float ) ( x + width ), ( float ) y );
-      glTexCoord2f( 0.0f, 0.0f ); glVertex2f( ( float )   x, ( float ) y );
-   glEnd();
-
-   glBindTexture( GL_TEXTURE_2D, 0 );
-
-   if( ! wasEnabled )
+   else
    {
-      glDisable( GL_TEXTURE_2D );
+      return;
    }
 }
 

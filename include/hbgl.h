@@ -79,9 +79,11 @@ struct _HBGL
 
    Font **fonts;               // Pointer to an array of Font structures
    int fontCount;              // Number of fonts loaded
+   int failedFontCount;        // Unloaded font counter
 
    Image **images;             // Pointer to an array of Image structures
    int imageCount;             // Number of images loaded
+   int failedImageCount;       // Unloaded image counter
 };
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
@@ -115,6 +117,7 @@ void begin_drawing( HBGL *pHBGL );
 void end_drawing( HBGL *pHBGL );
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+// internal
 void CheckOpenGLError( const char *stmt, const char *fname, int line, GLenum *errCode );
 void CheckHBGLError( HBGLErrorCode error_code, const char* description, const char* file, int line );
 
