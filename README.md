@@ -5,7 +5,9 @@
 
 `hbgl-c` is a lightweight and flexible library for game development and more. Built on top of [GLFW](https://www.glfw.org/),
 it's designed to offer a simple layer of abstraction over [OpenGL](https://www.opengl.org/), allowing developers to focus on
-creating content rather than dealing with the intricacies of OpenGL.
+creating content rather than dealing with the intricacies of OpenGL. This project makes use of the single-file [stb](https://github.com/nothings/stb)
+public domain libraries by Sean Barrett.
+
 
 ### Getting Started
 
