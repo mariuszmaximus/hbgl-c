@@ -47,14 +47,14 @@ static int decode_utf8( const unsigned char *text, int *out_codepoints, int max_
 Font *SystemFontNew( HBGL *pHBGL, const char *font_name )
 {
    char font_path[ 1024 ];
-   FILE *fp = NULL;
+   FILE *pFile = NULL;
 
    #if defined( _WIN32 ) || defined( _WIN64 )
       snprintf( font_path, sizeof( font_path ), "C:\\Windows\\Fonts\\%s.ttf", font_name );
-      fp = fopen( font_path, "rb" );
+      pFile = fopen( font_path, "rb" );
    #elif defined( __APPLE__ ) || defined( __MACH__ )
       snprintf( font_path, sizeof( font_path ), "/Library/Fonts/%s.ttf", font_name );
-      fp = fopen( font_path, "rb" );
+      pFile = fopen( font_path, "rb" );
    #elif defined( __linux__ )
       // Lista katalogów do przeszukania
       // find / -name your_font.ttf 2>/dev/null
@@ -70,8 +70,8 @@ Font *SystemFontNew( HBGL *pHBGL, const char *font_name )
       for( int i = 0; directories[ i ] != NULL; ++i )
       {
          snprintf( font_path, sizeof( font_path ), "%s%s.ttf", directories[ i ], font_name );
-         fp = fopen( font_path, "rb" );
-         if( fp != NULL )
+         pFile = fopen( font_path, "rb" );
+         if( pFile != NULL )
          {
             break;
          }
@@ -81,13 +81,16 @@ Font *SystemFontNew( HBGL *pHBGL, const char *font_name )
       return NULL;
    #endif
 
-   if( ! fp )
+   if( ! pFile )
    {
-      fprintf( stderr, "Failed to open font file: %s\n", font_path );
-      return NULL;
+      fprintf( stderr, "Font file not found in system directories: %s\n", font_name );
+      snprintf( font_path, sizeof( font_path ), "%s.ttf", font_name ); // Przygotowanie ścieżki do nieistniejącego pliku
+   }
+   else
+   {
+      fclose( pFile );
    }
 
-   fclose( fp );
    return FontNew( pHBGL, font_path );
 }
 
@@ -119,35 +122,54 @@ Font *FontNew( HBGL *pHBGL, const char *font_path )
 
    pFont->fontID = ++fontCounter;  // przydzielanie unikatowego ID
 
-   FILE *fp = fopen( font_path, "rb" );
-   if( ! fp )
+   FILE *pFile = fopen( font_path, "rb" );
+   if( ! pFile )
    {
       fprintf( stderr, "Failed to open font file: %s\n", font_path );
-      return NULL;
+
+      // Increment the counter of failed font loads
+      pFont->pHBGL->failedFontCount++;
+
+      // Cleanup if image loading failed
+      pFont->pHBGL->fontCount--;
+      if( pFont->pHBGL->fontCount > 0 )
+      {
+         // Set the last valid element of the array to NULL
+         pFont->pHBGL->fonts[ pFont->pHBGL->fontCount ] = NULL;
+      }
+      else
+      {
+         free( pFont->pHBGL->fonts );
+         pFont->pHBGL->fonts = NULL;
+      }
+
+      // Returning Font with zeroed dimensions to avoid errors with unloaded images.
+      memset( pFont, 0, sizeof( Font ) );
+      return pFont;
    }
 
-   fseek( fp, 0, SEEK_END );
-   size_t size = ftell( fp );
-   fseek( fp, 0, SEEK_SET );
+   fseek( pFile, 0, SEEK_END );
+   size_t size = ftell( pFile );
+   fseek( pFile, 0, SEEK_SET );
 
    unsigned char *ttf_buffer = malloc( size );
    if( ! ttf_buffer )
    {
       fprintf( stderr, "Failed to allocate memory for font buffer.\n" );
-      fclose( fp );
+      fclose( pFile );
       return NULL;
    }
 
-   size_t read_elements = fread( ttf_buffer, 1, size, fp );
+   size_t read_elements = fread( ttf_buffer, 1, size, pFile );
    if( read_elements != size )
    {
       fprintf( stderr, "Failed to read font file: expected %zu elements, got %zu.\n", size, read_elements );
       free( ttf_buffer );
-      fclose( fp );
+      fclose( pFile );
       return NULL;
    }
 
-   fclose( fp );
+   fclose( pFile );
 
    stbtt_fontinfo  font_info;
    if( ! stbtt_InitFont( &font_info, ttf_buffer, stbtt_GetFontOffsetForIndex( ttf_buffer, 0 ) ) )
@@ -171,73 +193,81 @@ Font *FontNew( HBGL *pHBGL, const char *font_path )
 
 void DrawFont( Font *pFont, float x, float y, const char *text, float fontSize, unsigned int color )
 {
-   // Aktualizacja pozycji obrazu
-   pFont->x = x;
-   pFont->y = y;
-
-   bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
-   if( ! wasEnabled )
+   if( pFont && pFont->pHBGL && pFont->pHBGL->fonts )
    {
-      glEnable( GL_TEXTURE_2D );
-   }
+      // Aktualizacja pozycji obrazu
+      pFont->x = x;
+      pFont->y = y;
 
-   float scale = fontSize / 64.0f;
+      bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
+      if( ! wasEnabled )
+      {
+         glEnable( GL_TEXTURE_2D );
+      }
 
-   if( ( color <= 0xffffff ) )
-   {
-      float r, g, b;
-      r = ( ( color >> 16 ) & 0xFF ) / 255.0f;
-      g = ( ( color >> 8 )  & 0xFF ) / 255.0f;
-      b = (   color         & 0xFF ) / 255.0f;
-      glColor3f( r, g, b );
-   }
-   else if( ( color <= 0xffffffff ) )
-   {
-      float r, g, b, a;
-      r = ( ( color >> 24 ) & 0xFF ) / 255.0f;
-      g = ( ( color >> 16 ) & 0xFF ) / 255.0f;
-      b = ( ( color >> 8 )  & 0xFF ) / 255.0f;
-      a = (   color         & 0xFF ) / 255.0f;
-      glColor4f( r, g, b, a );
+      float scale = fontSize / 64.0f;
+
+      if( ( color <= 0xffffff ) )
+      {
+         float r, g, b;
+         r = ( ( color >> 16 ) & 0xFF ) / 255.0f;
+         g = ( ( color >> 8 )  & 0xFF ) / 255.0f;
+         b = (   color         & 0xFF ) / 255.0f;
+         glColor3f( r, g, b );
+      }
+      else if( ( color <= 0xffffffff ) )
+      {
+         float r, g, b, a;
+         r = ( ( color >> 24 ) & 0xFF ) / 255.0f;
+         g = ( ( color >> 16 ) & 0xFF ) / 255.0f;
+         b = ( ( color >> 8 )  & 0xFF ) / 255.0f;
+         a = (   color         & 0xFF ) / 255.0f;
+         glColor4f( r, g, b, a );
+      }
+      else
+      {
+         printf( "Invalid hex value passed \n" );
+      }
+
+      // Dekodowanie UTF-8
+      int codepoints[ 256 ];
+      if( decode_utf8( ( const unsigned char * ) text, codepoints, 256 ) < 0 )
+      {
+         fprintf( stderr, "Incorrect sequence UTF-8.\n" );
+         return;
+      }
+
+      glBindTexture( GL_TEXTURE_2D, pFont->textureID );
+
+      glBegin( GL_QUADS );
+
+      int i = 0;
+      while( codepoints[ i ] != -1 )
+      {
+         stbtt_aligned_quad q;
+         stbtt_GetBakedQuad( pFont->cdata, 1024, 1024, codepoints[ i ] - 32, &x, &y, &q, 1 );
+
+         q.x0 *= scale; q.x1 *= scale;
+         q.y0 *= scale; q.y1 *= scale;
+
+         glTexCoord2f( q.s0, q.t0 ); glVertex2f( q.x0, q.y0 );
+         glTexCoord2f( q.s1, q.t0 ); glVertex2f( q.x1, q.y0 );
+         glTexCoord2f( q.s1, q.t1 ); glVertex2f( q.x1, q.y1 );
+         glTexCoord2f( q.s0, q.t1 ); glVertex2f( q.x0, q.y1 );
+
+         i++;
+      }
+      glEnd();
+
+      if( ! wasEnabled )
+      {
+         glDisable( GL_TEXTURE_2D );
+      }
    }
    else
    {
-      printf( "Invalid hex value passed \n" );
-   }
-
-   // Dekodowanie UTF-8
-   int codepoints[ 256 ];
-   if( decode_utf8( ( const unsigned char * ) text, codepoints, 256 ) < 0 )
-   {
-      fprintf( stderr, "Incorrect sequence UTF-8.\n" );
+      // Error code
       return;
-   }
-
-   glBindTexture( GL_TEXTURE_2D, pFont->textureID );
-
-   glBegin( GL_QUADS );
-
-   int i = 0;
-   while( codepoints[ i ] != -1 )
-   {
-      stbtt_aligned_quad q;
-      stbtt_GetBakedQuad( pFont->cdata, 1024, 1024, codepoints[ i ] - 32, &x, &y, &q, 1 );
-
-      q.x0 *= scale; q.x1 *= scale;
-      q.y0 *= scale; q.y1 *= scale;
-
-      glTexCoord2f( q.s0, q.t0 ); glVertex2f( q.x0, q.y0 );
-      glTexCoord2f( q.s1, q.t0 ); glVertex2f( q.x1, q.y0 );
-      glTexCoord2f( q.s1, q.t1 ); glVertex2f( q.x1, q.y1 );
-      glTexCoord2f( q.s0, q.t1 ); glVertex2f( q.x0, q.y1 );
-
-      i++;
-   }
-   glEnd();
-
-   if( ! wasEnabled )
-   {
-      glDisable( GL_TEXTURE_2D );
    }
 }
 
