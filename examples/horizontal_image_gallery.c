@@ -6,7 +6,7 @@
 
 int main()
 {
-   HBGL *app = WindowNew( 830, 450, "Test image" );
+   HBGL *app = WindowNew( 830, 450, "Horizontal image gallery" );
    Image *img1 = ImageNew( app, "../docs/assets/button/button-1.png" );
    Image *img2 = ImageNew( app, "../docs/assets/button/button-2.png" );
    Image *img3 = ImageNew( app, "../docs/assets/button/button-3.png" );
