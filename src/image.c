@@ -39,10 +39,15 @@ Image *ImageNew( HBGL *pHBGL, const char *image_path )
    if( ! data )
    {
       fprintf( stderr, "Failed to load image: %s\n", image_path );
+
+      // Increment the counter of failed image loads
+      pImage->pHBGL->failedImageCount++;
+
       // Cleanup if image loading failed
       pImage->pHBGL->imageCount--;
       if( pImage->pHBGL->imageCount > 0 )
       {
+         // Set the last valid element of the array to NULL
          pImage->pHBGL->images[ pImage->pHBGL->imageCount ] = NULL;
       }
       else
@@ -112,6 +117,7 @@ void DrawImage( Image *pImage, int x, int y, int width, int height )
    }
    else
    {
+      // Error code
       return;
    }
 }
